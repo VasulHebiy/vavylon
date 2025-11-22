@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Генератор персонажа RPG — з навичками та одягом</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        padding: 20px;
+        background: linear-gradient(135deg, #0a1929, #1a3658, #2a4d7a);
+        min-height: 100vh;
+        color: #fff;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 25px;
+        color: white;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      }
+
+      header h2 {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+      }
+
+      header p {
+        font-size: 1.1rem;
+        max-width: 700px;
+        margin: 0 auto;
+        opacity: 0.9;
+      }
+
+      #controls {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        margin-bottom: 25px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        align-items: center;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .input-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      input,
+      button {
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        font-size: 1rem;
+        transition: all 0.3s;
+      }
+
+      input {
+        width: 220px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      button {
+        background: #2563eb;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      button:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        background: #6b7280;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      #clearBtn {
+        background: #dc2626;
+      }
+
+      #clearBtn:hover {
+        background: #b91c1c;
+      }
+
+      .instructions {
+        width: 100%;
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .cooldown-info {
+        width: 100%;
+        padding: 10px;
+        background: rgba(220, 38, 38, 0.2);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.9);
+        text-align: center;
+        border: 1px solid rgba(220, 38, 38, 0.5);
+      }
+
+      #cardsContainer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 25px;
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      /* Стилі для картки */
+      .card-container {
+        width: 350px;
+        height: 500px;
+        perspective: 1000px;
+      }
+
+      .card {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.8s;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+
+      .card.flipped {
+        transform: rotateY(180deg);
+      }
+
+      .card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .card-front {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        color: white;
+      }
+
+      .card-back {
+        background: linear-gradient(135deg, #1e40af, #2563eb);
+        transform: rotateY(180deg);
+        color: white;
+      }
+
+      .card-header {
+        text-align: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .card-header h3 {
+        font-size: 1.4rem;
+        margin-bottom: 5px;
+      }
+
+      .card-header .degree {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+      }
+
+      .stat-label {
+        font-weight: 600;
+      }
+
+      .stat-value {
+        font-weight: 700;
+      }
+
+      .skills-section {
+        flex-grow: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .skills-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+      }
+
+      .skills-list {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+      }
+
+      .skill-item {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 8px 10px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .skill-name {
+        flex-grow: 1;
+      }
+
+      .skill-id {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-left: 10px;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .card-actions button {
+        flex: 1;
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+
+      .flip-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .flip-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* Стилі для зворотного боку */
+      .card-back-content {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+      }
+
+      .outfit-section {
+        margin-bottom: 15px;
+      }
+
+      .outfit-title {
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+        text-align: center;
+      }
+
+      .outfit-item {
+        background: rgba(255, 255, 255, 0.15);
+        padding: 12px;
+        border-radius: 8px;
+      }
+
+      .outfit-item-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        font-size: 1.1rem;
+        text-align: center;
+      }
+
+      .outfit-details {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .outfit-detail {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .outfit-label {
+        font-weight: 600;
+      }
+
+      .additional-info {
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .additional-info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .skills-section-back {
+        margin-top: 15px;
+      }
+
+      /* Стилі для скролбара */
+      .skills-list::-webkit-scrollbar,
+      .card-back-content::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .skills-list::-webkit-scrollbar-track,
+      .card-back-content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+
+      .skills-list::-webkit-scrollbar-thumb,
+      .card-back-content::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+      }
+
+      .skills-list::-webkit-scrollbar-thumb:hover,
+      .card-back-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+
+      @media (max-width: 768px) {
+        #controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .input-group {
+          justify-content: center;
+        }
+
+        input {
+          width: 100%;
+        }
+
+        .card-container {
+          width: 100%;
+          max-width: 400px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h2>Генератор персонажів RPG</h2>
+        <p>
+          Створюйте унікальних персонажів з навичками, одягом та
+          характеристиками. Натисніть на картку, щоб перевернути її!
+        </p>
+      </header>
+
+      <div id="controls">
+        <div class="input-group">
+          <input type="text" id="charName" placeholder="Ім'я персонажа" />
+          <button id="genNameBtn">Згенерувати ім'я</button>
+        </div>
+        <button id="createCardBtn">Створити персонажа</button>
+        <button id="clearBtn">Очистити всі картки</button>
+
+        <div class="instructions">
+          Кожна картка отримує 1 навик одразу. Натискай «Генерувати наступний
+          навик», щоб спробувати додати 2-й—5-й. Кнопка доступна тільки якщо
+          Інтелект > 0. Якщо спроба не вдалася — кнопка ховається.
+        </div>
+
+        <div id="cooldownInfo" class="cooldown-info" style="display: none">
+          Ви можете створити наступного персонажа через:
+          <span id="cooldownTimer">5:00:00</span>
+        </div>
+      </div>
+
+      <div id="cardsContainer"></div>
+    </div>
+
+    <template id="cardTemplate">
+      <div class="card-container">
+        <div class="card">
+          <div class="card-face card-front">
+            <div class="card-header">
+              <h3 class="name"></h3>
+              <div class="degree"></div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-label">Сила:</span>
+                <span class="stat-value strength"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Ловкість:</span>
+                <span class="stat-value agility"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Імунітет:</span>
+                <span class="stat-value immunity"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Витривалість:</span>
+                <span class="stat-value endurance"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Стійкість:</span>
+                <span class="stat-value resilience"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Інтелект:</span>
+                <span class="stat-value intellect"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Мудрість:</span>
+                <span class="stat-value wisdom"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Манна:</span>
+                <span class="stat-value mana"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Відновлення манни:</span>
+                <span class="stat-value manaRegen"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">HP:</span>
+                <span class="stat-value hp"></span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Зменшення шкоди:</span>
+                <span class="stat-value damageReduction"></span>
+              </div>
+            </div>
+
+            <div class="skills-section">
+              <div class="skills-title">Навички:</div>
+              <div class="skills-list"></div>
+            </div>
+
+            <div class="card-actions">
+              <button class="genSkillBtn">Генерувати навик</button>
+              <button class="flip-btn">Інформація</button>
+              <button class="deleteBtn">Видалити</button>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="card-back-content">
+              <div class="card-header">
+                <h3 class="name"></h3>
+                <div class="degree"></div>
+              </div>
+
+              <div class="outfit-section">
+                <div class="outfit-title">Костюм</div>
+                <div class="outfit-list"></div>
+              </div>
+
+              <div class="additional-info">
+                <div class="additional-info-item">
+                  <span class="stat-label">Вік:</span>
+                  <span class="stat-value age"></span>
+                </div>
+                <div class="additional-info-item">
+                  <span class="stat-label">Ріст:</span>
+                  <span class="stat-value height"></span>
+                </div>
+                <div class="additional-info-item">
+                  <span class="stat-label">Волосся:</span>
+                  <span class="stat-value hair"></span>
+                </div>
+              </div>
+
+              <div class="skills-section skills-section-back">
+                <div class="skills-title">Навички:</div>
+                <div class="skills-list"></div>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button class="flip-btn">Назад</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script>
+      /* -------------- КОНФІГУРАЦІЯ -------------- */
+      const MAX_BY_DEGREE = {
+        7: 35,
+        6: 40,
+        5: 50,
+        4: 65,
+        3: 80,
+        2: 140,
+        1: 180,
+        0: 230,
+      };
+      const MIN_PERCENT_BY_DEGREE = {
+        7: 0.2,
+        6: 0.25,
+        5: 0.3,
+        4: 0.4,
+        3: 0.5,
+        2: 0.65,
+        1: 0.8,
+        0: 0.9,
+      };
+      const DEGREE_PROBS = [
+        { d: 7, p: 30 },
+        { d: 6, p: 25 },
+        { d: 5, p: 18 },
+        { d: 4, p: 12 },
+        { d: 3, p: 8 },
+        { d: 2, p: 4 },
+        { d: 1, p: 2.5 },
+        { d: 0, p: 0.5 },
+      ];
+      const INT_WIS_CHANCE = {
+        7: 0.2,
+        6: 0.25,
+        5: 0.3,
+        4: 0.4,
+        3: 0.45,
+        2: 0.55,
+        1: 0.65,
+        0: 0.7,
+      };
+      const CORE_STATS = [
+        "strength",
+        "agility",
+        "immunity",
+        "endurance",
+        "resilience",
+      ];
+      const SKILL_SLOT_CHANCES = { 1: 1.0, 2: 0.5, 3: 0.2, 4: 0.04, 5: 0.03 };
+
+      // Дані для одягу
+      const OUTFIT_ITEMS = {
+        tops: [
+          "Чорна вітровка",
+          "Сіра кофта",
+          "Біла футболка",
+          "Червона толстовка",
+          "Синій светр",
+        ],
+        pants: [
+          "Чорні джинси",
+          "Сині джинси",
+          "Чорні спортивні штани",
+          "Сірі штани",
+          "Камуфляжні штани",
+        ],
+        shoes: [
+          "Чорні берці",
+          "Кросівки",
+          "Черевики",
+          "Ботильйони",
+          "Спортивне взуття",
+        ],
+      };
+
+      // Кольори волосся
+      const HAIR_COLORS = ["темно-каштанове", "біле", "чорне"];
+
+      // Час очікування між генерацією персонажів (5 годин у мілісекундах)
+      const GENERATION_COOLDOWN = 5 * 60 * 60 * 1000; // 5 годин
+
+      /* ---------------- СПИСОК НАВИЧОК (повний) ---------------- */
+      const SKILLS = [
+        "Контроль часу",
+        "Телекінез",
+        "Міжпросторовий стрибок",
+        "Крижана зброя",
+        "Вогняний шторм",
+        "Електричний розряд",
+        "Тіньовий крок",
+        "Кам'яний щит",
+        "Сталеві м'язи",
+        "Орлине око",
+        "Зцілення ран",
+        "Ментальний поштовх",
+        "Контроль тіні",
+        "Льодяна пастка",
+        "Вогняний щит",
+        "Енергетичний удар",
+        "Маскування",
+        "Кисневе поле",
+        "Прискорення",
+        "Техноконтроль",
+        "Психометрія",
+        "Астральна проекція",
+        "Копіювання навичок",
+        "Контроль рослин",
+        "Сейсмічний удар",
+        "Стіна вітру",
+        "Кислотний дощ",
+        "Телепатія",
+        "Ілюзія",
+        "Контроль магнітного поля",
+        "Темна матерія",
+        "Сонячний промінь",
+        "Гравітаційний тяж",
+        "Поле невидимості",
+        "Фотосинтез",
+        "Енергетичний вампиризм",
+        "Контроль сну",
+        "Поле страху",
+        "Психічний захист",
+        "Адаптація",
+        "Контроль пам'яті",
+        "Технопатія",
+        "Спогади предків",
+        "Поле сповільнення",
+        "Енергетичний кокон",
+        "Контроль удачі",
+        "Поле імунітету",
+        "Прокляття",
+        "Благословення",
+        "Воскресіння",
+        "Контроль емоцій",
+        "Поле болю",
+        "Поле радості",
+        "Психічна атака",
+        "Контроль свідомості",
+        "Поле істини",
+        "Контроль часу",
+        "Просторова кишенька",
+        "Телепортація",
+        "Контроль температури",
+        "Створення води",
+        "Створення їжі",
+        "Контроль звуку",
+        "Поле тиші",
+        "Ультразвук",
+        "Інфрачервоний зір",
+        "Рентгенівський зір",
+        "Термальний зір",
+        "Сила мурахи",
+        "Стрибок кота",
+        "Швидкість гепарда",
+        "Витривалість ведмедя",
+        "Гострий нюх",
+        "Абсолютний слух",
+        "Чуття небезпеки",
+        "Контроль піску",
+        "Контроль металу",
+        "Контроль скла",
+        "Контроль дерева",
+        "Контроль вогню",
+        "Контроль води",
+        "Контроль землі",
+        "Контроль повітря",
+        "Контроль блискавки",
+        "Контроль льоду",
+        "Контроль лави",
+        "Контроль пари",
+        "Контроль туману",
+        "Контроль дощу",
+        "Контроль снігу",
+        "Контроль бурі",
+        "Контроль торнадо",
+        "Контроль урагану",
+        "Контроль землетрусу",
+        "Контроль виверження",
+        "Контроль повені",
+        "Контроль зсуву",
+        "Контроль вакууму",
+        "Контроль плазми",
+        "Контроль радіації",
+        "Телекінез",
+        "Пірокінез",
+        "Кріокінез",
+        "Електрокінез",
+        "Геокінез",
+        "Аерокінез",
+        "Хронокінез",
+        "Руйнокінез",
+        "Гравікінез",
+        "Астральний вихід",
+        "Інверсія волі",
+        "Сфера антимагії",
+        "Посилений удар",
+        "Клинок сутності",
+        "Тіньовий крок",
+        "Хода через порожнечу",
+        "Сприйняття аури",
+        "Телепатія",
+        "Гіпноз",
+        "Емпатія",
+        "Аура страху",
+        "Ментальний щит",
+        "Ілюзійне бачення",
+        "Абсолютна концентрація",
+        "Квантовий стрибок",
+        "Вогняна спіраль",
+        "Крижаний спис",
+        "Енергетичний вибух",
+        "Темна хвиля",
+        "Сфера хаосу",
+        "Обмін енергією",
+        "Сфера контролю",
+        "Поглинання сутності",
+        "Відновлення клітин",
+        "Підсилення зору",
+        "Нічне бачення",
+        "Точний постріл",
+        "Відбиття снаряда",
+        "Удар енергії",
+        "Сприйняття часу",
+        "Реакція блискавки",
+        "Беззвучний рух",
+        "Підняття нежиті",
+        "Підпорядкування волі",
+        "Прокляття імені",
+        "Погляд страху",
+        "Магічний бар'єр",
+        "Енергетичний щит",
+        "Лезо тіні",
+        "Фазовий стрибок",
+        "Контроль гравітації",
+        "Руйнування матерії",
+        "Маніпуляція кров'ю",
+        "Абсорбція болю",
+        "Відновлення сил",
+        "Ментальний удар",
+        "Викривлення простору",
+        "Магічна регенерація",
+        "Поглинання світла",
+        "Енергетичний кидок",
+        "Левітація",
+        "Тіньова завіса",
+        "Кам'яна шкіра",
+        "Залізна воля",
+        "Шосте відчуття",
+        "Зір крізь тіні",
+        "Збільшення сили",
+        "Відлуння магії",
+        "Стійкість до болю",
+        "Бич реальності",
+        "Прискорення часу",
+        "Затримка миті",
+        "Аура відчаю",
+        "Відновлення енергії",
+        "Пам'ять предків",
+        "Точний удар",
+        "Легка хода",
+        "Баланс тіла",
+        "Рефлекс стрільця",
+        "Орлиний зір",
+        "Мовчазна атака",
+        "Швидке прицілення",
+        "Миттєвий блок",
+        "Міцна постава",
+        "Розрив дистанції",
+        "Укриття в димі",
+        "Контроль дихання",
+        "Перенаправлення сили",
+        "Розумна витривалість",
+        "Гострий слух",
+        "Орієнтація в темряві",
+        "Стійкість до магії",
+        "Підвищена реакція",
+        "Холоднокровність",
+        "Бойовий інстинкт",
+        "Аналіз бою",
+        "Передчуття небезпеки",
+        "Швидка регенерація",
+        "Зцілення ран",
+        "Підвищена витривалість",
+        "Посилення удару",
+        "Магічне чуття",
+        "Захисний імпульс",
+        "Теплове бачення",
+        "Швидке мислення",
+        "Покращений нюх",
+        "Стійкість нервів",
+        "Точна рівновага",
+        "Маневреність",
+        "Легка регенерація",
+        "Покращене слухання",
+        "Енергетичний зсув",
+        "Концентрація уваги",
+        "Розсіяна магія",
+        "Контроль емоцій",
+        "Відчуття магії",
+        "Зосередження волі",
+        "Витримка болю",
+        "Посилення рефлексів",
+        "Фокус енергії",
+        "Відновлення дихання",
+        "Підвищена точність",
+        "Розрахунок траєкторії",
+        "Миттєва реакція",
+        "Витривалі легені",
+        "Підвищений слух",
+        "Гнучкість тіла",
+        "Посилення чуттів",
+        "Стійкість до холоду",
+        "Витримка тепла",
+        "Внутрішній спокій",
+        "Легка регенерація",
+        "Покращений нюх",
+        "Контроль сили",
+        "Розгін швидкості",
+        "Миттєвий удар",
+        "Пригнічення страху",
+        "Швидка стабілізація",
+        "Уникання пасток",
+        "Орієнтація в просторі",
+        "Баланс енергії",
+        "Легка аура",
+        "Підвищений метаболізм",
+        "Коротке відновлення",
+        "Фізична гармонія",
+        "Ритм бою",
+        "Стійкість духу",
+        "Самоконтроль",
+        "Бойова концентрація",
+        "Контроль серця",
+      ];
+
+      /* ---------------- Утиліти ---------------- */
+      function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function generateName() {
+        const pref = [
+          "Альфа",
+          "Бета",
+          "Гамма",
+          "Дельта",
+          "Ехо",
+          "Зета",
+          "Тета",
+          "Кай",
+          "Люкс",
+          "Омега",
+        ];
+        const suf = [
+          "ор",
+          "ан",
+          "ікс",
+          "ум",
+          "ел",
+          "іс",
+          "он",
+          "ар",
+          "ус",
+          "ер",
+        ];
+        return (
+          pref[Math.floor(Math.random() * pref.length)] +
+          suf[Math.floor(Math.random() * suf.length)]
+        );
+      }
+
+      function chooseDegree() {
+        const r = Math.random() * 100;
+        let acc = 0;
+        for (const e of DEGREE_PROBS) {
+          acc += e.p;
+          if (r <= acc) return e.d;
+        }
+        return 0;
+      }
+
+      function generateOutfit() {
+        const top =
+          OUTFIT_ITEMS.tops[
+            Math.floor(Math.random() * OUTFIT_ITEMS.tops.length)
+          ];
+        const pants =
+          OUTFIT_ITEMS.pants[
+            Math.floor(Math.random() * OUTFIT_ITEMS.pants.length)
+          ];
+        const shoes =
+          OUTFIT_ITEMS.shoes[
+            Math.floor(Math.random() * OUTFIT_ITEMS.shoes.length)
+          ];
+        return { top, pants, shoes };
+      }
+
+      function generateHairColor() {
+        return HAIR_COLORS[Math.floor(Math.random() * HAIR_COLORS.length)];
+      }
+
+      /* ---------------- Генерація персонажа ---------------- */
+      function pickRandomSkill(exclude) {
+        const pool = SKILLS.filter((x) => !exclude.includes(x));
+        if (pool.length === 0) return null;
+        return pool[Math.floor(Math.random() * pool.length)];
+      }
+
+      function tryGenerateNextSkill(character) {
+        const count = character.skills.length;
+        if (count >= 5)
+          return {
+            success: false,
+            skill: null,
+            message: "Максимум навичок: 5.",
+          };
+
+        let slot = count + 1;
+        let chance = SKILL_SLOT_CHANCES[slot] || 0;
+
+        if (Math.random() <= chance) {
+          const skill = pickRandomSkill(character.skills);
+          if (!skill)
+            return {
+              success: false,
+              skill: null,
+              message: "Немає навичок у пулі.",
+            };
+          character.skills.push(skill);
+          return {
+            success: true,
+            skill,
+            message: `Отримано навичку: ${skill}`,
+          };
+        }
+        return { success: false, skill: null, message: "Не випало." };
+      }
+
+      function generateCharacter() {
+        const degree = chooseDegree();
+        const maxVal = MAX_BY_DEGREE[degree];
+        const minVal = Math.ceil(maxVal * MIN_PERCENT_BY_DEGREE[degree]);
+
+        const stats = {};
+        for (const s of CORE_STATS) {
+          stats[s] = randInt(minVal, maxVal);
+        }
+
+        const hasIntWis = Math.random() < INT_WIS_CHANCE[degree];
+        const intellect = hasIntWis ? randInt(minVal, maxVal) : null;
+        const wisdom = hasIntWis ? randInt(minVal, maxVal) : null;
+
+        const hp = Math.round(stats.endurance * 5);
+        const mana = intellect !== null ? intellect * 10 : null;
+        const manaRegen =
+          intellect !== null && wisdom !== null
+            ? (intellect + wisdom) * 0.1
+            : null;
+
+        const denom = stats.endurance + stats.resilience;
+        const damageReductionPercent =
+          denom > 0 ? Number(((stats.resilience / denom) * 100).toFixed(1)) : 0;
+
+        // Перший навик гарантовано лише якщо інтелект > 0
+        const firstSkill =
+          intellect !== null && intellect > 0 ? pickRandomSkill([]) : null;
+        const skills = firstSkill ? [firstSkill] : [];
+
+        // Генерація додаткових даних для зворотного боку
+        const age = randInt(14, 19); // Змінено вік
+        const height = randInt(169, 180);
+        const outfit = generateOutfit(); // Тепер один костюм
+        const hair = generateHairColor(); // Додано колір волосся
+
+        return {
+          degree,
+          strength: stats.strength,
+          agility: stats.agility,
+          immunity: stats.immunity,
+          endurance: stats.endurance,
+          resilience: stats.resilience,
+          intellect,
+          wisdom,
+          mana,
+          manaRegen,
+          hp,
+          damageReductionPercent,
+          skills,
+          age,
+          height,
+          outfit, // Тепер один костюм
+          hair, // Додано волосся
+        };
+      }
+
+      /* ---------------- DOM ---------------- */
+      const template = document.getElementById("cardTemplate");
+      const container = document.getElementById("cardsContainer");
+      const nameInput = document.getElementById("charName");
+      const genNameBtn = document.getElementById("genNameBtn");
+      const createCardBtn = document.getElementById("createCardBtn");
+      const clearBtn = document.getElementById("clearBtn");
+      const cooldownInfo = document.getElementById("cooldownInfo");
+      const cooldownTimer = document.getElementById("cooldownTimer");
+
+      let cooldownInterval = null;
+
+      // Функції для обмеження генерації
+      function getLastGenerationTime() {
+        return localStorage.getItem("lastGenerationTime");
+      }
+
+      function setLastGenerationTime() {
+        localStorage.setItem("lastGenerationTime", Date.now().toString());
+      }
+
+      function canGenerateCharacter() {
+        const lastTime = getLastGenerationTime();
+        if (!lastTime) return true;
+
+        const currentTime = Date.now();
+        const timePassed = currentTime - parseInt(lastTime);
+        return timePassed >= GENERATION_COOLDOWN;
+      }
+
+      function getRemainingTime() {
+        const lastTime = getLastGenerationTime();
+        if (!lastTime) return 0;
+
+        const currentTime = Date.now();
+        const timePassed = currentTime - parseInt(lastTime);
+        const remaining = GENERATION_COOLDOWN - timePassed;
+        return remaining > 0 ? remaining : 0;
+      }
+
+      function updateCooldownDisplay() {
+        const remaining = getRemainingTime();
+
+        if (remaining <= 0) {
+          cooldownInfo.style.display = "none";
+          createCardBtn.disabled = false;
+          createCardBtn.textContent = "Створити персонажа";
+          if (cooldownInterval) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+          }
+          return;
+        }
+
+        // Оновити відображення таймера
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor(
+          (remaining % (1000 * 60 * 60)) / (1000 * 60)
+        );
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+        cooldownTimer.textContent = `${hours
+          .toString()
+          .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+          .toString()
+          .padStart(2, "0")}`;
+        cooldownInfo.style.display = "block";
+        createCardBtn.disabled = true;
+        createCardBtn.textContent = "Зачекайте...";
+      }
+
+      function startCooldown() {
+        setLastGenerationTime();
+        updateCooldownDisplay();
+
+        // Оновлювати таймер кожну секунду
+        if (!cooldownInterval) {
+          cooldownInterval = setInterval(updateCooldownDisplay, 1000);
+        }
+      }
+
+      genNameBtn.onclick = () => {
+        nameInput.value = generateName();
+      };
+
+      /* --- Створення картки --- */
+      function createCard(character, name) {
+        const node = template.content.firstElementChild.cloneNode(true);
+        const cardContainer = node;
+        const card = cardContainer.querySelector(".card");
+        const front = card.querySelector(".card-front");
+        const back = card.querySelector(".card-back");
+
+        // Заповнення лицьової сторони
+        front.querySelector(".name").textContent = name;
+        front.querySelector(
+          ".degree"
+        ).textContent = `Ступінь: ${character.degree}`;
+        front.querySelector(".strength").textContent = character.strength;
+        front.querySelector(".agility").textContent = character.agility;
+        front.querySelector(".immunity").textContent = character.immunity;
+        front.querySelector(".endurance").textContent = character.endurance;
+        front.querySelector(".resilience").textContent = character.resilience;
+        front.querySelector(".intellect").textContent =
+          character.intellect ?? "---";
+        front.querySelector(".wisdom").textContent = character.wisdom ?? "---";
+        front.querySelector(".mana").textContent = character.mana ?? "---";
+        front.querySelector(".manaRegen").textContent =
+          character.manaRegen !== null ? character.manaRegen.toFixed(1) : "---";
+        front.querySelector(".hp").textContent = character.hp;
+        front.querySelector(".damageReduction").textContent =
+          character.damageReductionPercent !== null
+            ? character.damageReductionPercent + "%"
+            : "---";
+
+        const skillsBox = front.querySelector(".skills-list");
+
+        function refreshSkillsUI() {
+          skillsBox.innerHTML = "";
+          if (character.skills.length === 0) {
+            const emptyMsg = document.createElement("div");
+            emptyMsg.className = "skill-item";
+            emptyMsg.textContent = "Немає навичок";
+            skillsBox.appendChild(emptyMsg);
+          } else {
+            character.skills.forEach((s, i) => {
+              const div = document.createElement("div");
+              div.className = "skill-item";
+              div.innerHTML = `<div class="skill-name">${i + 1}. ${s}</div>
+                              <div class="skill-id">#${
+                                SKILLS.indexOf(s) + 1
+                              }</div>`;
+              skillsBox.appendChild(div);
+            });
+          }
+        }
+        refreshSkillsUI();
+
+        const genSkillBtn = front.querySelector(".genSkillBtn");
+        const deleteBtn = front.querySelector(".deleteBtn");
+        const flipBtns = cardContainer.querySelectorAll(".flip-btn");
+
+        if (character.intellect === null || character.intellect <= 0) {
+          genSkillBtn.style.display = "none";
+        }
+
+        genSkillBtn.onclick = () => {
+          const r = tryGenerateNextSkill(character);
+          alert(r.message);
+
+          if (r.success) {
+            refreshSkillsUI();
+            refreshBackSkillsUI();
+            if (character.skills.length >= 5) {
+              genSkillBtn.style.display = "none";
+            }
+            saveCards();
+          } else {
+            genSkillBtn.style.display = "none";
+            saveCards();
+          }
+        };
+
+        if (character.skills.length >= 5) {
+          genSkillBtn.style.display = "none";
+        }
+
+        deleteBtn.onclick = () => {
+          if (confirm("Видалити цю картку?")) {
+            cardContainer.remove();
+            saveCards();
+          }
+        };
+
+        // Заповнення зворотного боку
+        back.querySelector(".name").textContent = name;
+        back.querySelector(
+          ".degree"
+        ).textContent = `Ступінь: ${character.degree}`;
+        back.querySelector(".age").textContent = character.age;
+        back.querySelector(".height").textContent = character.height + " см";
+        back.querySelector(".hair").textContent = character.hair;
+
+        const outfitList = back.querySelector(".outfit-list");
+        outfitList.innerHTML = "";
+
+        const outfitItem = document.createElement("div");
+        outfitItem.className = "outfit-item";
+        outfitItem.innerHTML = `
+          <div class="outfit-details">
+            <div class="outfit-detail">
+              <span class="outfit-label">Верх:</span>
+              <span>${character.outfit.top}</span>
+            </div>
+            <div class="outfit-detail">
+              <span class="outfit-label">Штани:</span>
+              <span>${character.outfit.pants}</span>
+            </div>
+            <div class="outfit-detail">
+              <span class="outfit-label">Взуття:</span>
+              <span>${character.outfit.shoes}</span>
+            </div>
+          </div>
+        `;
+        outfitList.appendChild(outfitItem);
+
+        // Навички на зворотному боці
+        const backSkillsBox = back.querySelector(".skills-list");
+
+        function refreshBackSkillsUI() {
+          backSkillsBox.innerHTML = "";
+          if (character.skills.length === 0) {
+            const emptyMsg = document.createElement("div");
+            emptyMsg.className = "skill-item";
+            emptyMsg.textContent = "Немає навичок";
+            backSkillsBox.appendChild(emptyMsg);
+          } else {
+            character.skills.forEach((s, i) => {
+              const div = document.createElement("div");
+              div.className = "skill-item";
+              div.innerHTML = `<div class="skill-name">${i + 1}. ${s}</div>
+                              <div class="skill-id">#${
+                                SKILLS.indexOf(s) + 1
+                              }</div>`;
+              backSkillsBox.appendChild(div);
+            });
+          }
+        }
+        refreshBackSkillsUI();
+
+        // Додавання обробників для перевертання картки
+        flipBtns.forEach((btn) => {
+          btn.onclick = () => {
+            card.classList.toggle("flipped");
+          };
+        });
+
+        container.appendChild(cardContainer);
+      }
+
+      /* ---------------- Збереження / Завантаження ---------------- */
+      function saveCards() {
+        const cards = [...document.querySelectorAll(".card-container")].map(
+          (cardContainer) => {
+            const card = cardContainer.querySelector(".card");
+            const front = card.querySelector(".card-front");
+            const back = card.querySelector(".card-back");
+
+            const get = (sel) =>
+              front.querySelector(sel)?.textContent.trim() ?? null;
+            const getBack = (sel) =>
+              back.querySelector(sel)?.textContent.trim() ?? null;
+
+            const degreeEl = front.querySelector(".degree");
+            const degree = degreeEl
+              ? parseInt(degreeEl.textContent.replace("Ступінь: ", ""))
+              : 0;
+
+            const skillsEls = front.querySelectorAll(
+              ".skills-list .skill-item"
+            );
+            const skills = [...skillsEls]
+              .filter((el) => !el.textContent.includes("Немає навичок"))
+              .map((el) =>
+                el
+                  .querySelector(".skill-name")
+                  .textContent.replace(/^\d+\.\s*/, "")
+              );
+
+            // Отримання даних з зворотного боку
+            const age = parseInt(getBack(".age")) || 0;
+            const height = parseInt(getBack(".height")) || 0;
+            const hair = getBack(".hair") || "чорне";
+
+            const outfitDetails = back.querySelector(".outfit-details");
+            const outfit = {
+              top: outfitDetails.querySelector(
+                "div:nth-child(1) span:last-child"
+              ).textContent,
+              pants: outfitDetails.querySelector(
+                "div:nth-child(2) span:last-child"
+              ).textContent,
+              shoes: outfitDetails.querySelector(
+                "div:nth-child(3) span:last-child"
+              ).textContent,
+            };
+
+            return {
+              name: get(".name"),
+              degree,
+              strength: Number(get(".strength")) || 0,
+              agility: Number(get(".agility")) || 0,
+              immunity: Number(get(".immunity")) || 0,
+              endurance: Number(get(".endurance")) || 0,
+              resilience: Number(get(".resilience")) || 0,
+
+              intellect: (() => {
+                let t = get(".intellect");
+                return t === "---" ? null : Number(t);
+              })(),
+              wisdom: (() => {
+                let t = get(".wisdom");
+                return t === "---" ? null : Number(t);
+              })(),
+              mana: (() => {
+                let t = get(".mana");
+                return t === "---" ? null : Number(t);
+              })(),
+              manaRegen: (() => {
+                let t = get(".manaRegen");
+                return t === "---" ? null : Number(t);
+              })(),
+
+              hp: Number(get(".hp")) || 0,
+              damageReductionPercent: (() => {
+                let t = get(".damageReduction");
+                return t === "---" ? null : Number(t.replace("%", ""));
+              })(),
+
+              skills,
+              age,
+              height,
+              outfit,
+              hair,
+            };
+          }
+        );
+
+        localStorage.setItem("cards", JSON.stringify(cards));
+      }
+
+      function loadCards() {
+        const raw = localStorage.getItem("cards");
+        if (!raw) return;
+        let arr = [];
+        try {
+          arr = JSON.parse(raw);
+        } catch (e) {
+          console.error("Помилка JSON:", e);
+          return;
+        }
+
+        for (const c of arr) {
+          const character = {
+            degree: c.degree,
+            strength: c.strength,
+            agility: c.agility,
+            immunity: c.immunity,
+            endurance: c.endurance,
+            resilience: c.resilience,
+            intellect: c.intellect,
+            wisdom: c.wisdom,
+            mana: c.mana,
+            manaRegen: c.manaRegen,
+            hp: c.hp,
+            damageReductionPercent: c.damageReductionPercent,
+            skills: c.skills ?? [],
+            age: c.age || randInt(14, 19),
+            height: c.height || randInt(169, 180),
+            outfit: c.outfit || generateOutfit(),
+            hair: c.hair || generateHairColor(),
+          };
+          createCard(character, c.name || "Безіменний");
+        }
+      }
+
+      /* ---------------- Події керування ---------------- */
+      createCardBtn.onclick = () => {
+        if (!canGenerateCharacter()) {
+          alert(
+            "Ви можете створити нового персонажа лише раз на 5 годин. Зачекайте, будь ласка."
+          );
+          return;
+        }
+
+        const name = nameInput.value.trim() || generateName();
+        const ch = generateCharacter();
+        createCard(ch, name);
+        startCooldown();
+        saveCards();
+      };
+
+      clearBtn.onclick = () => {
+        if (confirm("Очистити ВСІ картки?")) {
+          container.innerHTML = "";
+          localStorage.removeItem("cards");
+          // Не очищуємо таймер генерації, щоб обмеження залишилось
+        }
+      };
+
+      // Завантаження карток при старті
+      loadCards();
+
+      // Перевірка таймера при завантаженні сторінки
+      updateCooldownDisplay();
+      if (getRemainingTime() > 0 && !cooldownInterval) {
+        cooldownInterval = setInterval(updateCooldownDisplay, 1000);
+      }
+    </script>
+  </body>
+</html>
