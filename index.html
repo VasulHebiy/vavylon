@@ -200,6 +200,7 @@
         background: linear-gradient(135deg, #2c2c2c, #3a3a3a, #2c2c2c);
         color: #e0e0e0;
         border: 1px solid #5d5d5d;
+        overflow-y: auto; /* Додано скрол для першої сторінки */
       }
 
       .card-back {
@@ -207,6 +208,7 @@
         transform: rotateY(180deg);
         color: #e0e0e0;
         border: 1px solid #5d5d5d;
+        overflow-y: auto; /* Залишено скрол для другої сторінки */
       }
 
       .card-header {
@@ -401,26 +403,26 @@
         margin-top: 12px;
       }
 
-      /* Стилі для скролбара */
-      .skills-list::-webkit-scrollbar,
-      .card-back-content::-webkit-scrollbar {
+      /* Стилі для скролбара - тепер для обох сторін */
+      .card-front::-webkit-scrollbar,
+      .card-back::-webkit-scrollbar {
         width: 6px;
       }
 
-      .skills-list::-webkit-scrollbar-track,
-      .card-back-content::-webkit-scrollbar-track {
+      .card-front::-webkit-scrollbar-track,
+      .card-back::-webkit-scrollbar-track {
         background: rgba(40, 40, 40, 0.8);
         border-radius: 3px;
       }
 
-      .skills-list::-webkit-scrollbar-thumb,
-      .card-back-content::-webkit-scrollbar-thumb {
+      .card-front::-webkit-scrollbar-thumb,
+      .card-back::-webkit-scrollbar-thumb {
         background: #8b4513;
         border-radius: 3px;
       }
 
-      .skills-list::-webkit-scrollbar-thumb:hover,
-      .card-back-content::-webkit-scrollbar-thumb:hover {
+      .card-front::-webkit-scrollbar-thumb:hover,
+      .card-back::-webkit-scrollbar-thumb:hover {
         background: #a0522d;
       }
 
@@ -1247,7 +1249,7 @@
         "Телекінетичний захист",
         "Погляд страху",
         "Створення ілюзії впевненості",
-        "Магічний бар’єр",
+        "Магічний бар'єр",
         "Призов істоти-молотоносця",
         "Крижана зброя",
         "Телекінетичний контроль",
@@ -1265,7 +1267,7 @@
         "Телекінетичне кидання",
         "Руйнування матерії",
         "Створення ілюзії здоров'я",
-        "Маніпуляція кров’ю",
+        "Маніпуляція кров'ю",
         "Призов істоти-ніжника",
         "Крижана птаха",
         "Телекінетичне толкання",
@@ -1289,7 +1291,7 @@
         "Телекінетичне розтягування",
         "Тіньова завіса",
         "Створення ілюзії молодості",
-        "Кам’яна шкіра",
+        "Кам'яна шкіра",
         "Призов істоти-вогнеметальника",
         "Вибух води",
         "Перетворення в тварину",
@@ -1325,7 +1327,7 @@
         "Перетворення в вогонь",
         "Відновлення енергії",
         "Вибух тіні",
-        "Пам’ять предків",
+        "Пам'ять предків",
         "Призов істоти-тінеметальника",
         "Водяний кінь",
         "Перетворення в повітря",
@@ -1446,7 +1448,7 @@
         "Створення часового меча",
         "Телепортація в світ вогню",
         "Створення людини",
-        "Кров’яна аура",
+        "Кров'яна аура",
         "Зцілення ран",
         "Створення часового щита",
         "Телепортація в світ повітря",
@@ -2026,7 +2028,7 @@
         "Аура небуття",
         "Бачення зоряного плану",
         "Бачення галактичного плану",
-        "Пам’ять безодні",
+        "Пам'ять безодні",
         "Бачення всесвітнього плану",
         "Бачення мультивсесвітного плану",
         "Бачення реального плану",
